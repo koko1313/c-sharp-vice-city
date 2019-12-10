@@ -7,90 +7,113 @@ namespace ViceCity.Models.Guns
 {
     abstract class Gun : IGun
     {
-        public string Name { get; set; }
-        public int BulletsPerBarrel { get; set; }
-        public int TotalBullets { get; set; }
-        public bool CanFire { get; set; }
-        private int bulletsInBarrel { get; set; }
-        private int bulletsPerShot { get; set; }
-        public Gun(string name, int bulletsPerBarrel, int totalBullets, int bulletsPerShot)
+        private string name;
+        private int bulletsPerBarrel;
+        private int totalBullets;
+        private bool canFire;
+        private int barrelCapacity;
+        
+        protected Gun(string name, int bulletsPerBarrel, int totalBullets)
         {
-            SetName(name);
-            SetBulletsPerBarrel(bulletsPerBarrel);
-            SetTotalBullets(totalBullets);
-            SetCanFire(bulletsPerShot, totalBullets);
-            this.bulletsPerShot = bulletsPerShot;
+            this.Name = name;
+            this.BulletsPerBarrel = bulletsPerBarrel;
+            this.TotalBullets = totalBullets;
+            this.barrelCapacity = bulletsPerBarrel;
         }
 
-        public int Fire()
+        public abstract int Fire();
+
+        protected void Reload(int barrelCapacity) 
         {
-            SetCanFire(bulletsInBarrel, TotalBullets);
-            if(!CanFire)
+            if (this.TotalBullets >= barrelCapacity) 
             {
-                Reload();
+                this.BulletsPerBarrel = barrelCapacity;
+                this.TotalBullets -= barrelCapacity;
             }
-
-            if (CanFire)
-            {
-                bulletsInBarrel -= bulletsPerShot;
-                return bulletsPerShot;
-            }
-
-            return -1;
         }
-        private void Reload()
+
+        protected int DecreaseBullets(int bullets)
         {
-            if (bulletsInBarrel<=0)
+            int firedBullets = 0;
+            if(this.BulletsPerBarrel - bullets >= 0) 
             {
-                if (TotalBullets>BulletsPerBarrel)
+                this.BulletsPerBarrel -= 1;
+                firedBullets = bullets;
+            }
+
+            return firedBullets;
+        }
+
+        #region GettersAndSetters
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+            private set
+            {
+                if (string.IsNullOrEmpty(value))
                 {
-                    bulletsInBarrel = BulletsPerBarrel;
-                    TotalBullets -= BulletsPerBarrel;
+                    throw new ArgumentException(
+                        message: "Name cannot be null or a white space!");
+                }
+                name = value;
+            }
+        }
+
+        public int BulletsPerBarrel 
+        {
+            get
+            {
+                return bulletsPerBarrel;
+            }
+            private set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException(
+                        message: "Bullets cannot be below zero!");
+                }
+                bulletsPerBarrel = value;
+            }
+        }
+
+        public int TotalBullets 
+        {
+            get
+            {
+                return totalBullets;
+            }
+            private set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException(
+                        message: "Total bullets cannot be below zero!");
+                }
+                totalBullets = value;
+            }
+        }
+
+        public bool CanFire 
+        {
+            get 
+            {
+                return canFire;
+            }
+            set
+            {
+                if (bulletsPerBarrel > 0 || totalBullets > 0)
+                {
+                    canFire = true;
                 }
                 else
                 {
-                    bulletsInBarrel = TotalBullets;
-                    TotalBullets -= bulletsInBarrel;
+                    canFire = false;
                 }
             }
         }
-        private void SetName(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentException(
-                    message: "Name cannot be null or a white space!");
-            }
-            this.Name = name;
-        }
-        private void SetBulletsPerBarrel(int bulletsPerBarrel)
-        {
-            if (bulletsPerBarrel<0)
-            {
-                throw new ArgumentException(
-                    message: "Bullets cannot be below zero!");
-            }
-            this.BulletsPerBarrel = bulletsPerBarrel;
-        }
-        private void SetTotalBullets(int totalBullets)
-        {
-            if (totalBullets < 0)
-            {
-                throw new ArgumentException(
-                    message: "Total bullets cannot be below zero!");
-            }
-            this.TotalBullets = totalBullets;
-        }
-        private void SetCanFire(int bulletsInBarrel, int totalBullets)
-        {
-            if (bulletsInBarrel>0)//////////////////////////////ERROR (barrel/total)
-            {
-                this.CanFire = true;
-            }
-            else
-            {
-                this.CanFire = false;
-            }
-        }
+        #endregion
     }
 }

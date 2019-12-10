@@ -3,23 +3,25 @@ using System.Collections.Generic;
 using System.Text;
 using ViceCity.Models.Guns.Contracts;
 using ViceCity.Models.Players.Contracts;
+using ViceCity.Repositories;
 using ViceCity.Repositories.Contracts;
 
 namespace ViceCity.Models.Players
 {
     abstract class Player : IPlayer
     {
-        public string Name { get; set; }
-        public bool IsAlive { get; set; }
-        public IRepository<IGun> GunRepository { get; }
-        public int LifePoints { get; set; }
+        private string name;
+        private int lifePoints;
+        private IRepository<IGun> gunRepository;
+        private bool isAlive;
 
-        public Player(string name, int lifePoints)
+        protected Player(string name, int lifePoints) 
         {
-            SetName(name);
-            SetLifePoints(lifePoints);
-            SetIsAlive(lifePoints);
+            this.Name = name;
+            this.LifePoints = lifePoints;
+            this.gunRepository = new GunRepository();
         }
+
         public void TakeLifePoints(int points)
         {
             if (this.LifePoints<points)
@@ -30,36 +32,63 @@ namespace ViceCity.Models.Players
             {
                 this.LifePoints = 0;
             }
-            SetIsAlive(this.LifePoints);
         }
-        public void SetName(string name)
+
+        #region GettersAndSetters
+        public string Name
         {
-            if (string.IsNullOrEmpty(name))
+            get
             {
-                throw new ArgumentException(
-                    message: "Player's name cannot be null or a whitespace!");
+                return name;
             }
-            this.Name = name;
+            private set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentException(
+                        message: "Player's name cannot be null or a whitespace!");
+                }
+                name = value;
+            }
         }
-        public void SetLifePoints(int lifePoints)
+
+        public int LifePoints
         {
-            if (lifePoints<0)////////////////////////////////////////////////////////////////////////// ERROR(<=)
+            get
             {
-                throw new ArgumentException(
-                    message: "Player life points cannot be below zero!");
+                return lifePoints;
             }
-            this.LifePoints = lifePoints;
+            private set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException(
+                        message: "Player life points cannot be below zero!");
+                }
+                lifePoints = value;
+            }
         }
-        public void SetIsAlive(int lifePoints)
+
+        public IRepository<IGun> GunRepository { get; }
+
+        public bool IsAlive
         {
-            if (lifePoints>0)
+            get
             {
-                this.IsAlive = true;
+                return isAlive;
             }
-            else
+            private set
             {
-                this.IsAlive = false;
+                if (this.LifePoints > 0)
+                {
+                    isAlive = true;
+                }
+                else
+                {
+                    isAlive = false;
+                }
             }
         }
+        #endregion
     }
 }
