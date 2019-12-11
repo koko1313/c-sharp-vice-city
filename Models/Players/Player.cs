@@ -11,20 +11,21 @@ namespace ViceCity.Models.Players
     abstract class Player : IPlayer
     {
         private string name;
-        private int lifePoints;
-        private IRepository<IGun> gunRepository;
         private bool isAlive;
+        private IRepository<IGun> gunRepository;
+        private int lifePoints;
+        
 
-        protected Player(string name, int lifePoints) 
+        public Player(string name, int lifePoints)
         {
             this.Name = name;
             this.LifePoints = lifePoints;
-            this.gunRepository = new GunRepository();
+            this.IsAlive = true;
+            this.GunRepository = new GunRepository();
         }
-
         public void TakeLifePoints(int points)
         {
-            if (this.LifePoints<points)
+            if (this.LifePoints>=points)
             {
                 this.LifePoints -= points;
             }
@@ -32,15 +33,15 @@ namespace ViceCity.Models.Players
             {
                 this.LifePoints = 0;
             }
+            if (lifePoints<=0)
+            {
+                this.IsAlive = false;
+            }
         }
-
-        #region GettersAndSetters
+        #region gettersAndSetters
         public string Name
         {
-            get
-            {
-                return name;
-            }
+            get => this.name;
             private set
             {
                 if (string.IsNullOrEmpty(value))
@@ -48,16 +49,21 @@ namespace ViceCity.Models.Players
                     throw new ArgumentException(
                         message: "Player's name cannot be null or a whitespace!");
                 }
-                name = value;
+                this.name = value;
             }
         }
-
+        public bool IsAlive
+        {
+            get => this.isAlive;
+            protected set
+            {
+                this.isAlive = value;
+            }
+        }
+        public IRepository<IGun> GunRepository { get; }
         public int LifePoints
         {
-            get
-            {
-                return lifePoints;
-            }
+            get => this.lifePoints;
             private set
             {
                 if (value < 0)
@@ -65,28 +71,7 @@ namespace ViceCity.Models.Players
                     throw new ArgumentException(
                         message: "Player life points cannot be below zero!");
                 }
-                lifePoints = value;
-            }
-        }
-
-        public IRepository<IGun> GunRepository { get; }
-
-        public bool IsAlive
-        {
-            get
-            {
-                return isAlive;
-            }
-            private set
-            {
-                if (this.LifePoints > 0)
-                {
-                    isAlive = true;
-                }
-                else
-                {
-                    isAlive = false;
-                }
+                this.lifePoints = value;
             }
         }
         #endregion

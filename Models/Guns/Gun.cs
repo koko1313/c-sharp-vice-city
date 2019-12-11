@@ -11,46 +11,34 @@ namespace ViceCity.Models.Guns
         private int bulletsPerBarrel;
         private int totalBullets;
         private bool canFire;
-        private int barrelCapacity;
         
-        protected Gun(string name, int bulletsPerBarrel, int totalBullets)
+        public Gun(string name, int bulletsPerBarrel, int totalBullets)
         {
             this.Name = name;
             this.BulletsPerBarrel = bulletsPerBarrel;
             this.TotalBullets = totalBullets;
-            this.barrelCapacity = bulletsPerBarrel;
+            this.BulletsInBarrel = bulletsPerBarrel;
+            this.CanFire = true;
         }
 
         public abstract int Fire();
-
-        protected void Reload(int barrelCapacity) 
+        protected void Reload()
         {
-            if (this.TotalBullets >= barrelCapacity) 
+            if (TotalBullets>BulletsPerBarrel)
             {
-                this.BulletsPerBarrel = barrelCapacity;
-                this.TotalBullets -= barrelCapacity;
+                BulletsInBarrel = BulletsPerBarrel;
+                TotalBullets -= BulletsPerBarrel;
+            }
+            else
+            {
+                BulletsInBarrel = TotalBullets;
+                TotalBullets -= BulletsInBarrel;
             }
         }
-
-        protected int DecreaseBullets(int bullets)
-        {
-            int firedBullets = 0;
-            if(this.BulletsPerBarrel - bullets >= 0) 
-            {
-                this.BulletsPerBarrel -= 1;
-                firedBullets = bullets;
-            }
-
-            return firedBullets;
-        }
-
-        #region GettersAndSetters
+        #region gettersAndSetters
         public string Name
         {
-            get
-            {
-                return name;
-            }
+            get => this.name;
             private set
             {
                 if (string.IsNullOrEmpty(value))
@@ -58,16 +46,12 @@ namespace ViceCity.Models.Guns
                     throw new ArgumentException(
                         message: "Name cannot be null or a white space!");
                 }
-                name = value;
+                this.name = value;
             }
         }
-
-        public int BulletsPerBarrel 
+        public int BulletsPerBarrel
         {
-            get
-            {
-                return bulletsPerBarrel;
-            }
+            get => this.bulletsPerBarrel;
             private set
             {
                 if (value < 0)
@@ -75,16 +59,12 @@ namespace ViceCity.Models.Guns
                     throw new ArgumentException(
                         message: "Bullets cannot be below zero!");
                 }
-                bulletsPerBarrel = value;
+                this.bulletsPerBarrel = value;
             }
         }
-
-        public int TotalBullets 
+        public int TotalBullets
         {
-            get
-            {
-                return totalBullets;
-            }
+            get => this.totalBullets;
             private set
             {
                 if (value < 0)
@@ -92,28 +72,19 @@ namespace ViceCity.Models.Guns
                     throw new ArgumentException(
                         message: "Total bullets cannot be below zero!");
                 }
-                totalBullets = value;
+                this.totalBullets = value;
             }
         }
-
-        public bool CanFire 
+        public bool CanFire
         {
-            get 
+            get => this.canFire;
+            protected set
             {
-                return canFire;
-            }
-            set
-            {
-                if (bulletsPerBarrel > 0 || totalBullets > 0)
-                {
-                    canFire = true;
-                }
-                else
-                {
-                    canFire = false;
-                }
+                this.canFire = value;
             }
         }
+        protected int BulletsInBarrel { get; set; }
+        protected int BulletsPerShot { get; set; }
         #endregion
     }
 }
